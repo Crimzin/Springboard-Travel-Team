@@ -11,6 +11,8 @@
             <!-- CSS libraries -->
             <link rel="stylesheet" href="css/bootstrap.min.css">
             <link rel="stylesheet" href="css/font-awesome.min.css">
+            <link rel="stylesheet" href="css/sortable-theme-bootstrap.css" />
+            <link rel="stylesheet" href="css/jquery-ui.css" />
 
             <!-- Custom CSS code -->
             <link rel="stylesheet" href="css/style.css">
@@ -19,13 +21,50 @@
     <div>
         <h1> OSL Travel Grant </h1>
     </div>
-<!--<div>-->
-<!--<h2>Survey Data Sources</h2>-->
-<!--<p><a href="http://www2.census.gov/econ/sbo/97/e97cs-1.pdf">1997 Data</a></p>-->
-<!--<p><a href="https://www.census.gov/econ/sbo/historical.html?2002">2002 Data</a></p>-->
-<!--<p><a href="https://www.census.gov/econ/sbo/historical.html?2007">2007 Data</a></p>-->
-<!--<p><a href="https://www.census.gov/econ/sbo/getdata.html">2012 Data</a></p>-->
-<!--</div>-->
+
+    <div class="container-fluid">
+        <!--<div id="table" class="row">-->
+            <!--<thead>-->
+                <!--<th>Rank</th>-->
+                <!--<th>Club</th>-->
+                <!--<th>Cost</th>-->
+                <!--<th>Inevitable</th>-->
+                <!--<th>Unsafe</th>-->
+                <!--<th>Recommendation</th>-->
+            <!--</thead>-->
+            <!--<tbody id="rankings" class="table ui-sortable" data-sortable style="width: 100%">-->
+                <!--<<tr class="ui-sortable-handle"><td class='priority'>1</td><td>George Washington</td><td>Apple</td><td>N</td><td><a class='btn btn-delete btn-danger'>Delete</a></td></tr>-->
+                <!--<tr class="ui-sortable-handle"><td class='priority'>2</td><td>John Adams</td><td>Pear</td><td>Y</td><td><a class='btn btn-delete btn-danger'>Delete</a></td></tr>-->
+                <!--<tr class="ui-sortable-handle"><td class='priority'>3</td><td>Thomas Jefferson</td><td>Banana</td><td>Y</td><td><a class='btn btn-delete btn-danger'>Delete</a></td></tr>-->
+                <!--<tr class="ui-sortable-handle"><td class='priority'>4</td><td>Ben Franklin</td><td>Kumquat</td><td>N</td><td><a class='btn btn-delete btn-danger'>Delete</a></td></tr>-->
+                <!--<tr class="ui-sortable-handle"><td class='priority'>5</td><td>Alexander Hamilton</td><td>Red grapes</td><td>N</td><td><a class='btn btn-delete btn-danger'>Delete</a></td></tr>-->
+            <!--</tbody>-->
+        <!--</div>-->
+
+        <div class="row">
+            <table>
+                <thead>
+                    <th>Rank</th>
+                    <th>Club</th>
+                    <th>Cost</th>
+                    <th>Score</th>
+                    <th>Inevitable</th>
+                    <th>Unsafe</th>
+                    <th>Method</th>
+                    <th>Weather</th>
+                    <th>Departure</th>
+                    <th>Arrival</th>
+                    <th>Return</th>
+                </thead>
+                <tbody id="ranking">
+                </tbody>
+            </table>
+        </div>
+
+        <div id="scatter" class="row">
+        </div>
+
+    </div>
 
 
 <!-- Load JS libraries -->
@@ -33,6 +72,10 @@
 <script src="js/bootstrap.min.js"></script>
 <script src="js/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.js"></script>
+<script src="js/sortable.min.js"></script>
+<script src="js/jquery-sortable.js"></script>
+<script src="js/bootstrap-sortable.js"></script>
+<script src="js/jquery-ui.js"></script>
 
 <!-- Load data, create visualizations -->
 <script src="js/main.js"></script>

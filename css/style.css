@@ -17,6 +17,17 @@ h2 {
   margin-bottom: 40px;
 }
 
+th {
+  text-align: center;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+td {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
 .container-fluid {
 	padding-right: 30px;
 	padding-left: 30px;
@@ -45,4 +56,11 @@ h2 {
   stroke: #fff;
   fill-opacity: .125;
   shape-rendering: crispEdges;
+}
+
+.ui-sortable tr {
+  cursor:pointer;
+}
+.ui-sortable tr:hover {
+  background:rgba(244,251,17,0.45);
 }

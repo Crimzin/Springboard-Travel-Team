@@ -22,7 +22,7 @@ var yScale = d3.scale.linear().range([height, 0]), // value -> display
 var rScale = d3.scale.linear()
     .range([3.5, 15]);
 
-var svg = d3.select("body").append("svg")
+var svg = d3.select("#scatter").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
@@ -32,6 +32,10 @@ var svg = d3.select("body").append("svg")
 var tooltip = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
+
+var origins = ["Boston, MA"];
+var destinations = [];
+var lengths = [];
 
 function loadData() {
     d3.csv("data/Harvard_Student_Organization_Travel_Profile_(Responses).csv", function(error, data) {
@@ -140,9 +144,97 @@ function runAlgorithm(data) {
         return b.score - a.score;
     })
 
-    console.log(data);
+    data.sort(function(a, b){
+        return a.score - b.score;
+    });
 
-    //console.log(filteredData);
+    var maxInevitable = d3.max(data, function(d) {return d.inevitability});
+    var maxUnsafe = d3.max(data, function(d) {return d.safety});
+    var maxScore = d3.max(data, function(d) {return d.score});
+
+    function normalize(raw, max){
+        return (raw * 10) / max;
+    }
+
+    var i = data.length;
+    data.forEach(function(trip){
+        //initialize row and cells
+        var table = document.getElementById("ranking");
+        var row = table.insertRow(0);
+        var rank = row.insertCell(0);
+        var club = row.insertCell(1);
+        var cost = row.insertCell(2);
+        var score = row.insertCell(3);
+        var inevitable = row.insertCell(4);
+        var unsafe = row.insertCell(5);
+        var method = row.insertCell(6);
+
+        //id the rows by organization
+        row.setAttribute("id", trip.organization);
+
+        //give them values
+        rank.innerHTML = i;
+        club.innerHTML = trip.organization;
+        club.style = "text-align: left";
+        cost.innerHTML = trip.expenses;
+        inevitable.innerHTML = Math.round(normalize(trip.inevitability, maxInevitable));
+        unsafe.innerHTML = Math.round(normalize(trip.safety, maxUnsafe));
+        score.innerHTML = Math.round(normalize(trip.score, maxScore));
+        method.innerHTML = trip.transport_without;
+        if (trip.transport_without == "Drive") {
+            method.style.color = "red";
+        }
+        i--;
+    })
+
+    //start the whole lengths calculation debacle by making an array of destinations
+    data.forEach(function(trip) {
+        destinations.push(trip.destination);
+    });
+
+    console.log(destinations);
+
+    //initialize a counter so we know when to end the asynchronous function
+    var counter = 0;
+
+    //Google Maps stuff
+    var service = new google.maps.DistanceMatrixService;
+    service.getDistanceMatrix({
+        origins: origins,
+        destinations: destinations,
+        travelMode: google.maps.TravelMode.DRIVING,
+        unitSystem: google.maps.UnitSystem.IMPERIAL,
+        avoidHighways: false,
+        avoidTolls: false
+    }, function callback(response, status) {
+        if (status == google.maps.DistanceMatrixStatus.OK) {
+            console.log(response.rows[0].elements);
+            console.log(data);
+            response.rows[0].elements.forEach(function(trip) {
+                lengths.push(trip.duration.text);
+                counter++;
+                if (counter == data.length) {
+                    console.log(lengths);
+                    //put the lengths in the ranking table
+                    displayLengths();
+                }
+            });
+        }
+    });
+
+    function displayLengths() {
+        lengths.reverse();
+        var table = document.getElementById("ranking");
+        for (var i = 0, row; row = table.rows[i]; i++) {
+            var length = row.insertCell(7);
+            length.style.whiteSpace = "nowrap";
+            length.innerHTML = lengths[i];
+            var index = data.length - i - 1;
+            if (data[index].transport_without == "Drive"){
+                length.style.color = "red";
+            }
+        }
+    };
 
     // don't want dots overlapping axis, so add in buffer to data domain
     xScale.domain([d3.min(data, function(d) {return d.safety})-1, d3.max(data, function(d) {return d.safety})+1]);
@@ -188,8 +280,8 @@ function runAlgorithm(data) {
             tooltip.transition()
                 //.duration(200)
                 .style("opacity", 1);
-            tooltip.html("<strong>" + d.organization + "</strong><br/> Unsafe: " + d.safety
-                    + "<br/> Inevitable: " + d.inevitability
+            tooltip.html("<strong>" + d.organization + "</strong><br/> Unsafe: " + Math.round(normalize(d.safety, maxUnsafe))
+                    + "<br/> Inevitable: " + Math.round(normalize(d.inevitability, maxInevitable))
                     + "<br/> People: " + d.people)
                 .style("left", (d3.event.pageX + 5) + "px")
                 .style("top", (d3.event.pageY - 28) + "px");
@@ -199,48 +291,14 @@ function runAlgorithm(data) {
                 //.duration(500)
                 .style("opacity", 0);
         });
-
-    data.sort(function(a, b){
-       return a.score - b.score;
-    });
-
-    var maxInevitable = d3.max(data, function(d) {return d.inevitability});
-    var maxUnsafe = d3.max(data, function(d) {return d.safety});
-    var maxScore = d3.max(data, function(d) {return d.score});
-
-    function normalize(raw, max){
-        return (raw * 10) / max;
-    }
-
-    var i = data.length;
-    data.forEach(function(trip){
-        //initialize row and cells
-        var table = document.getElementById("ranking");
-        var row = table.insertRow(0);
-        var rank = row.insertCell(0);
-        var club = row.insertCell(1);
-        var cost = row.insertCell(2);
-        var score = row.insertCell(3);
-        var inevitable = row.insertCell(4);
-        var unsafe = row.insertCell(5);
-
-        //give them values
-        rank.innerHTML = i;
-        club.innerHTML = trip.organization;
-        club.style = "text-align: left";
-        cost.innerHTML = trip.expenses;
-        inevitable.innerHTML = Math.round(normalize(trip.inevitability, maxInevitable));
-        unsafe.innerHTML = Math.round(normalize(trip.safety, maxUnsafe));
-        score.innerHTML = Math.round(normalize(trip.score, maxScore));
-        i--;
-    })
 }
 
 // TO DO:
-// 4) Automate length of driving (based on date+times and destinations)
-//      Query Google for this - GeoData lab might be able to help
-// 8) Map visualization
+// #) Incorporate "at night"
 // 3) Factor in weather (AUTOMATE BASED ON DATES)
+// #) Document upload AJAX
+//      This will be difficult
+// 8) Map visualization
 // 9) Link vizs (e.g. hover over a trip in one and the others light up)
 // 5) Factor in driving AT destination (probably needs to just be
 //    displayed when you hover over the group's div in the ranking
@@ -252,6 +310,7 @@ function runAlgorithm(data) {
 //      Use this to display the cost differential of funding the trip
 // Ask if Cat (or anyone from Springboard) wants to join tha committee
 // Organize meeting with Dean Friedrich and Peyton and Cat
+// Test survey
 // Put together slides
 // Send Lauren Qualtrics survey
 

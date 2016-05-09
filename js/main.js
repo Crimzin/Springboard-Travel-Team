@@ -155,14 +155,22 @@ function runAlgorithm(data) {
         return a.score - b.score;
     });
 
+    //normalize scores (I know normalize isn't technically the correct term)
     var maxInevitable = d3.max(data, function(d) {return d.inevitability});
     var maxUnsafe = d3.max(data, function(d) {return d.safety});
     var maxScore = d3.max(data, function(d) {return d.score});
+
+    data.forEach(function(trip) {
+        trip.inevitability = normalize(trip.inevitability, maxInevitable);
+        trip.safety = normalize(trip.safety, maxUnsafe);
+        trip.score = normalize(trip.score, maxScore);
+    });
 
     function normalize(raw, max){
         return (raw * 10) / max;
     }
 
+    //create and start populating the table
     var i = data.length;
     data.forEach(function(trip){
         //initialize row and cells
@@ -182,9 +190,9 @@ function runAlgorithm(data) {
         rank.innerHTML = i;
         club.innerHTML = trip.organization;
         club.style = "text-align: left";
-        inevitable.innerHTML = Math.round(normalize(trip.inevitability, maxInevitable));
-        unsafe.innerHTML = Math.round(normalize(trip.safety, maxUnsafe));
-        score.innerHTML = Math.round(normalize(trip.score, maxScore));
+        inevitable.innerHTML = Math.round(trip.inevitability);
+        unsafe.innerHTML = Math.round(trip.safety, maxUnsafe);
+        score.innerHTML = Math.round(trip.score, maxScore);
         method.innerHTML = trip.transport_without;
         if (trip.transport_without == "Drive") {
             method.style.color = "red";
@@ -226,6 +234,8 @@ function runAlgorithm(data) {
         }
     });
 
+
+    //do all the night hours stuff
     var night_hours_array = [];
 
     data.forEach(function (trip) {
@@ -245,6 +255,7 @@ function runAlgorithm(data) {
         night_hours_array.push(hours);
     });
 
+    //display length and night hours
     function displayHours() {
         lengths.reverse();
         night_hours_array.reverse();
@@ -268,9 +279,11 @@ function runAlgorithm(data) {
     };
 
 
+    //that's it for the table - visualization things happen now!
+
     // don't want dots overlapping axis, so add in buffer to data domain
-    xScale.domain([d3.min(data, function(d) {return d.safety})-1, d3.max(data, function(d) {return d.safety})+1]);
-    yScale.domain([d3.min(data, function(d) {return d.inevitability})-1, d3.max(data, function(d) {return d.inevitability})+1]);
+    xScale.domain([d3.min(data, function(d) {return d.safety - 1}), d3.max(data, function(d) {return d.safety + 1})]);
+    yScale.domain([d3.min(data, function(d) {return d.inevitability -1}), d3.max(data, function(d) {return d.inevitability +1})]);
     rScale.domain([d3.min(data, function(d) {return d.people}), d3.max(data, function(d) {return d.people})]);
 
     // x-axis

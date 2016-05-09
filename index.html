@@ -2,22 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script src="js/jquery.min.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?v=3"></script>
-    <title><!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <title>Title</title>
+    <script type="text/javascript" src="js/jquery.tablesorter.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.js"></script>
+    <script src="js/sortable.min.js"></script>
+    <script src="js/jquery-sortable.js"></script>
+    <script src="js/bootstrap-sortable.js"></script>
+    <script src="js/jquery-ui.js"></script>
 
-            <!-- CSS libraries -->
-            <link rel="stylesheet" href="css/bootstrap.min.css">
-            <link rel="stylesheet" href="css/font-awesome.min.css">
-            <link rel="stylesheet" href="css/sortable-theme-bootstrap.css" />
-            <link rel="stylesheet" href="css/jquery-ui.css" />
+    <!-- CSS libraries -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/sortable-theme-bootstrap.css" />
+    <link rel="stylesheet" href="css/jquery-ui.css" />
 
-            <!-- Custom CSS code -->
-            <link rel="stylesheet" href="css/style.css">
-        </head>
+    <!-- Custom CSS code -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <title>OSL Travel Grant Committee</title>
+
+</head>
 <body>
     <div>
         <h1> OSL Travel Grant </h1>
@@ -43,16 +50,18 @@
         <!--</div>-->
 
         <div class="row" style="margin-bottom: 30px;">
-            <table>
+            <table id="table" class="tablesorter">
                 <thead>
                     <th>Rank</th>
                     <th>Club</th>
-                    <th>Cost</th>
                     <th>Score</th>
                     <th>Inevitable</th>
                     <th>Unsafe</th>
                     <th>Method</th>
-                    <th>Length</th>
+                    <th>Hours</th>
+                    <th>Night Hours</th>
+                    <th>Drivers</th>
+                    <th>Hours/Driver</th>
                     <th>Weather</th>
                     <th>Departure</th>
                     <th>Arrival</th>
@@ -70,16 +79,9 @@
 
 
 <!-- Load JS libraries -->
-<script src="js/jquery.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/d3.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.js"></script>
-<script src="js/sortable.min.js"></script>
-<script src="js/jquery-sortable.js"></script>
-<script src="js/bootstrap-sortable.js"></script>
-<script src="js/jquery-ui.js"></script>
 
-<!-- Load data, create visualizations -->
+
+    <!-- Load data, create visualizations -->
 <script src="js/main.js"></script>
 
 </body>

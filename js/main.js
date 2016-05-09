@@ -37,6 +37,12 @@ var origins = ["Boston, MA"];
 var destinations = [];
 var lengths = [];
 
+$(document).ready(function()
+    {
+        $("#table").tablesorter();
+    }
+);
+
 function loadData() {
     d3.csv("data/Harvard_Student_Organization_Travel_Profile_(Responses).csv", function(error, data) {
         if (error){
@@ -71,6 +77,7 @@ function loadData() {
                 delete trip.return_arrival_time;
                 trip.traveled_before = +trip.traveled_before;
                 trip.weather = +trip.weather;
+                trip.night_hours = 0;
                 trip.inevitability = 0;
                 trip.safety = 1;
                 trip.score = 0;
@@ -163,11 +170,10 @@ function runAlgorithm(data) {
         var row = table.insertRow(0);
         var rank = row.insertCell(0);
         var club = row.insertCell(1);
-        var cost = row.insertCell(2);
-        var score = row.insertCell(3);
-        var inevitable = row.insertCell(4);
-        var unsafe = row.insertCell(5);
-        var method = row.insertCell(6);
+        var score = row.insertCell(2);
+        var inevitable = row.insertCell(3);
+        var unsafe = row.insertCell(4);
+        var method = row.insertCell(5);
 
         //id the rows by organization
         row.setAttribute("id", trip.organization);
@@ -176,7 +182,6 @@ function runAlgorithm(data) {
         rank.innerHTML = i;
         club.innerHTML = trip.organization;
         club.style = "text-align: left";
-        cost.innerHTML = trip.expenses;
         inevitable.innerHTML = Math.round(normalize(trip.inevitability, maxInevitable));
         unsafe.innerHTML = Math.round(normalize(trip.safety, maxUnsafe));
         score.innerHTML = Math.round(normalize(trip.score, maxScore));
@@ -185,7 +190,7 @@ function runAlgorithm(data) {
             method.style.color = "red";
         }
         i--;
-    })
+    });
 
     //start the whole lengths calculation debacle by making an array of destinations
     data.forEach(function(trip) {
@@ -209,32 +214,59 @@ function runAlgorithm(data) {
     }, function callback(response, status) {
         if (status == google.maps.DistanceMatrixStatus.OK) {
             console.log(response.rows[0].elements);
-            console.log(data);
             response.rows[0].elements.forEach(function(trip) {
                 lengths.push(trip.duration.text);
                 counter++;
                 if (counter == data.length) {
                     console.log(lengths);
                     //put the lengths in the ranking table
-                    displayLengths();
+                    displayHours();
                 }
             });
         }
     });
 
-    function displayLengths() {
+    var night_hours_array = [];
+
+    data.forEach(function (trip) {
+        var departure_date = trip.departure;
+        var arrival_date = trip.arrival;
+        var departure_hour = departure_date.getHours();
+        var arrival_hour = arrival_date.getHours();
+        var hours = 0;
+
+        if (trip.driving == "TRUE") {
+            if (((departure_hour < 6) || (departure_hour > 18) || ((arrival_hour < 6) || (arrival_hour > 18)))) {
+                trip.night_hours += (arrival_hour - departure_hour);
+                hours = trip.night_hours;
+            }
+        }
+
+        night_hours_array.push(hours);
+    });
+
+    function displayHours() {
         lengths.reverse();
+        night_hours_array.reverse();
         var table = document.getElementById("ranking");
         for (var i = 0, row; row = table.rows[i]; i++) {
-            var length = row.insertCell(7);
+            //length stuff
+            var length = row.insertCell(6);
             length.style.whiteSpace = "nowrap";
             length.innerHTML = lengths[i];
+
+            var night_hours = row.insertCell(7);
+            night_hours.innerHTML = night_hours_array[i];
+
             var index = data.length - i - 1;
             if (data[index].transport_without == "Drive"){
                 length.style.color = "red";
+                data[index].length = lengths[i];
+                data[index].hours_per_driver = lengths[i]/data.drivers_to_destination;
             }
         }
     };
+
 
     // don't want dots overlapping axis, so add in buffer to data domain
     xScale.domain([d3.min(data, function(d) {return d.safety})-1, d3.max(data, function(d) {return d.safety})+1]);
@@ -294,10 +326,10 @@ function runAlgorithm(data) {
 }
 
 // TO DO:
-// #) Incorporate "at night"
+// 1) Drivers per hour
+// 2) Incorporate "at night"
 // 3) Factor in weather (AUTOMATE BASED ON DATES)
-// #) Document upload AJAX
-//      This will be difficult
+// #) Document upload AJAX (this will be difficult)
 // 8) Map visualization
 // 9) Link vizs (e.g. hover over a trip in one and the others light up)
 // 5) Factor in driving AT destination (probably needs to just be
@@ -313,6 +345,10 @@ function runAlgorithm(data) {
 // Test survey
 // Put together slides
 // Send Lauren Qualtrics survey
+// Lauren's notes on survey:
+//    At what time should be approximate time.
+//    One concern is that the question about how will travel if get funding vs if don't is that encourages gaming the system
+//
 
 
 //Google Maps API key: AIzaSyBN98VC0PKeNpxFB6vA_DE0JfD2Q9poWuA
